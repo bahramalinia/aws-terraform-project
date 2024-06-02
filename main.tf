@@ -156,7 +156,7 @@ resource "null_resource" "gitlab_setup" {
       "sudo apt-get update -y && echo 'apt-get update completed' > /home/ubuntu/script_log.txt 2>&1",
       "sudo apt-get install -y docker.io && echo 'Docker installed' > /home/ubuntu/script_log.txt 2>&1",
       "sudo mkdir -p /srv/gitlab/config /srv/gitlab/logs /srv/gitlab/data",
-      "sudo docker run --detach --hostname ${var.gitlab_hostname} --env GITLAB_OMNIBUS_CONFIG=\"external_url 'http://${var.gitlab_hostname}'\" --publish 443:443 --publish 80:80 --publish 2222:22 --name gitlab --restart always --volume /srv/gitlab/config:/etc/gitlab --volume /srv/gitlab/logs:/var/log/gitlab --volume /srv/gitlab/data:/var/opt/gitlab --shm-size 256m ggitlab/gitlab-ee:latest && echo 'GitLab container started' > /home/ubuntu/script_log.txt 2>&1 || echo 'Failed to start GitLab container' > /home/ubuntu/script_log.txt 2>&1"
+      "sudo docker run --detach --hostname ${var.gitlab_hostname} --env GITLAB_OMNIBUS_CONFIG=\"external_url 'http://${var.gitlab_hostname}'\" --publish 443:443 --publish 80:80 --publish 2222:22 --name gitlab --restart always --volume /srv/gitlab/config:/etc/gitlab --volume /srv/gitlab/logs:/var/log/gitlab --volume /srv/gitlab/data:/var/opt/gitlab --shm-size 256m gitlab/gitlab-ee:latest && echo 'GitLab container started' > /home/ubuntu/script_log.txt 2>&1 || echo 'Failed to start GitLab container' > /home/ubuntu/script_log.txt 2>&1"
     ]
   }
 }
