@@ -1,14 +1,3 @@
-# GitLab Deployment with Terraform and Helm
-
-This README provides step-by-step instructions for deploying GitLab using Terraform and Helm, addressing common issues and configurations needed for a successful deployment.
-
-## Fixing Helm Release Error
-
-If you encounter an error stating that a release with the name already exists, you can delete the existing release:
-
-```sh
-helm delete gitlab --namespace default
-```
 
 ## AWS CLI Configuration
 
@@ -229,4 +218,15 @@ This guide gives you a basic setup. Depending on your requirements, you might wa
 kubectl get ingress 
 ws acm describe-certificate --certificate-arn arn:aws:acm:eu-west-3:849749410199:certificate/11f46391-2fb0-4d5b-b725-65f4ea4a4339
 aws route53 list-resource-record-sets --hosted-zone-id Z01685731FU9J0R5WRRX1  
+```
+
+# Troubleshoot
+
+## Getting Gitlab root password
+
+```
+# ssh to EC2 machine
+docker ps
+docker exec -it CONTAINER_ID cat /etc/gitlab/initial_root_password
+
 ```
