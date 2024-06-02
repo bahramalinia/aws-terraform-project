@@ -127,8 +127,8 @@ resource "local_file" "private_key" {
 
 # Define an EC2 instance (GitLab server)
 resource "aws_instance" "gitlab_server" {
-  ami                           = "ami-00ac45f3035ff009e"  # Change to your preferred AMI
-  instance_type                 = "t3.medium"
+  ami                           = "ami-052984d1804039ba8"  # Change to your preferred AMI
+  instance_type                 = "t3a.large"
   user_data_replace_on_change   = true
   subnet_id                     = element(data.aws_subnets.default.ids, 0)
   vpc_security_group_ids        = [aws_security_group.gitlab_sg.id]
@@ -145,19 +145,22 @@ resource "null_resource" "gitlab_setup" {
   provisioner "remote-exec" {
     connection {
       type        = "ssh"
-      user        = "ubuntu"
+      user        = "ec2-user" // "ubuntu"
       private_key = file(var.private_key_path)
       host        = aws_eip.gitlab_eip.public_ip
       timeout     = "2m"  # Increase timeout for longer operations
     }
 
     inline = [
-      "echo 'Starting script execution' > /home/ubuntu/script_log.txt 2>&1",
-      "sudo apt-get update -y && echo 'apt-get update completed' > /home/ubuntu/script_log.txt 2>&1",
-      "sudo apt-get install -y docker.io && echo 'Docker installed' > /home/ubuntu/script_log.txt 2>&1",
+      "echo 'Starting script execution' > /home/ec2-user/script_log.txt 2>&1",
+      "sudo yum update -y && echo 'yum update completed' >> /home/ec2-user/script_log.txt 2>&1",
+      "sudo yum install -y docker && echo 'Docker installed' >> /home/ec2-user/script_log.txt 2>&1",
+      "sudo service docker start && echo 'Docker service started' >> /home/ec2-user/script_log.txt 2>&1",
+      "sudo usermod -aG docker ec2-user && echo 'Added ec2-user to docker group' >> /home/ec2-user/script_log.txt 2>&1",
       "sudo mkdir -p /srv/gitlab/config /srv/gitlab/logs /srv/gitlab/data",
-      "sudo docker run --detach --hostname ${var.gitlab_hostname} --env GITLAB_OMNIBUS_CONFIG=\"external_url 'http://${var.gitlab_hostname}'\" --publish 443:443 --publish 80:80 --publish 2222:22 --name gitlab --restart always --volume /srv/gitlab/config:/etc/gitlab --volume /srv/gitlab/logs:/var/log/gitlab --volume /srv/gitlab/data:/var/opt/gitlab --shm-size 256m gitlab/gitlab-ee:latest && echo 'GitLab container started' > /home/ubuntu/script_log.txt 2>&1 || echo 'Failed to start GitLab container' > /home/ubuntu/script_log.txt 2>&1"
+      "sudo docker run --detach --hostname ${var.gitlab_hostname} --env GITLAB_OMNIBUS_CONFIG=\"external_url 'http://${var.gitlab_hostname}'\" --publish 443:443 --publish 80:80 --publish 2222:22 --name gitlab --restart always --volume /srv/gitlab/config:/etc/gitlab --volume /srv/gitlab/logs:/var/log/gitlab --volume /srv/gitlab/data:/var/opt/gitlab --shm-size 256m gitlab/gitlab-ee:latest && echo 'GitLab container started' >> /home/ec2-user/script_log.txt 2>&1 || echo 'Failed to start GitLab container' >> /home/ec2-user/script_log.txt 2>&1"
     ]
+
   }
 }
 
